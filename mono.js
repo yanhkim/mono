@@ -70,7 +70,7 @@
         this._domain = domain = domain || Mono._domain;
         this._level = level = level || Mono._level;
         defineProperties(this, logger(domain, level));
-        defineProperties(Mono.prototype, leveler(this));
+        defineProperties(this, leveler(this));
     };
 
     // set (not) constants
