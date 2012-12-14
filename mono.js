@@ -1,4 +1,13 @@
-define(function() {
+(function(g, factory) {
+    // this conditional AMD module define code is ripped off from [github.com/ggozad/underi18n]
+    if (typeof define === 'function' && define.amd) {
+       define([], function() {
+           return (g.Mono = factory());
+       });
+    } else {
+       g.Mono = factory();
+    }
+})(this, function() {
     function timetag() {
         // format: Fri Dec 14 2012 15:02:39 GMT+0900 (KST)
         var d = new Date(),
