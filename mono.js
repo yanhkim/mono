@@ -28,13 +28,15 @@ define(function() {
         };
     }
 
-    var Mono = function() {};
-
     function defineProperties(o, props) {
         for (var key in props) {
             o[key] = props[key];
         }
     }
+
+    var Mono = function(domain) {
+        defineProperties(this, logger(domain));
+    };
 
     defineProperties(Mono, {
         LOG: 1,
