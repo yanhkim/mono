@@ -8,6 +8,17 @@
        g.Mono = factory();
     }
 })(this, function() {
+    var levels = {
+        LOG: 1,
+        DEBUG: 2,
+        INFO: 3,
+        WARNING: 4,
+        ERROR: 5
+    };
+
+    // global on-off switch
+    var off = false;
+
     function timetag() {
         // format: Fri Dec 14 2012 15:02:39 GMT+0900 (KST)
         var d = new Date(),
@@ -19,21 +30,21 @@
         return time + ',' + mil;
     }
 
-    function logger(domain) {
-        domain = domain || 'root';
-        function binder(fn, level) {
-            return function() {
-                // logging format: Dec 14 2012 15:42:41,453 - LOG - root - [your message here] 
+    function logger(domain, level) {
+        function binder(enabled, fn, level) {
+            return enabled ? function() {
+                if (off) return;
+                // logging format: Dec 14 2012 15:42:41,453 - LOG - root - [your message here]
                 var prefix = [timetag(), level, domain].join(' - ') + ' -';
                 fn.apply(console, [prefix].concat([].slice.call(arguments, 0)));
-            };
+            } : new Function();
         }
         return {
-            l: binder(console.log, 'LOG'),
-            d: binder(console.debug, 'DEBUG'),
-            i: binder(console.info, 'INFO'),
-            w: binder(console.warn, 'WARNING'),
-            e: binder(console.error, 'ERROR')
+            l: binder(levels.LOG >= level, console.log, 'LOG'),
+            d: binder(levels.DEBUG >= level, console.debug, 'DEBUG'),
+            i: binder(levels.INFO >= level, console.info, 'INFO'),
+            w: binder(levels.WARNING >= level, console.warn, 'WARNING'),
+            e: binder(levels.ERROR >= level, console.error, 'ERROR')
         };
     }
 
@@ -43,20 +54,45 @@
         }
     }
 
-    var Mono = function(domain) {
-        defineProperties(this, logger(domain));
+    function leveler(o) {
+        return {
+            getLevel: function() { return o._level; },
+            setLevel: function(l) {
+                if (o._level === l) return;
+                o._level = l;
+                defineProperties(o, logger(o._domain, o._level));
+            },
+            isEnabled: function(l) { return l >= o._level; }
+        };
+    }
+
+    var Mono = function(domain, level) {
+        this._domain = domain = domain || Mono._domain;
+        this._level = level = level || Mono._level;
+        defineProperties(this, logger(domain, level));
+        defineProperties(Mono.prototype, leveler(this));
     };
 
+    // set (not) constants
+    defineProperties(Mono, levels);
+
+    // set default values
     defineProperties(Mono, {
-        LOG: 1,
-        DEBUG: 2,
-        INFO: 3,
-        WARNING: 4,
-        ERROR: 5
+        _domain: 'root',
+        _level: levels.LOG
+    });
+
+    // inject on-off functionality
+    defineProperties(Mono, {
+        off: function() { off = true; return this; },
+        on: function() { off = false; return this; }
     });
 
     // setup default logger
-    defineProperties(Mono, logger());
+    defineProperties(Mono, logger(Mono._domain, Mono._level));
+
+    // inject level handlers
+    defineProperties(Mono, leveler(Mono));
 
     return Mono;
 });
