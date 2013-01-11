@@ -24,14 +24,23 @@
     var off = false;
 
     function timetag() {
-        // format: Fri Dec 14 2012 15:02:39 GMT+0900 (KST)
+        // out form(local time): Fri Jan 11 2013 13:33:42,055
         var d = new Date(),
-            ds = d.toLocaleString(),
-            re = /\w+ (\w+ \d+ \d+ \S+)/,
-            time = re.exec(ds)[1],
-            mil = d.getMilliseconds();
+            mtab = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            dtab = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            d2 = function(t) { return t < 10 ? '0' + t : '' + t; },
+            d3 = function(t) { return t < 10 ? '00' + t : (t < 100 ? '0' + t : '' + t); };
 
-        return time + ',' + mil;
+        return [
+            dtab[d.getDay()],
+            mtab[d.getMonth()],
+            d.getDate(),
+            d.getFullYear(), [
+                d2(d.getHours()),
+                d2(d.getMinutes()),
+                d2(d.getSeconds()) + ',' + d3(d.getMilliseconds())
+            ].join(':')
+        ].join(' ');
     }
 
     function logger(Obj) {
