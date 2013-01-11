@@ -1,11 +1,15 @@
-(function(g, factory) {
-    // this conditional AMD module define code is ripped off from [github.com/ggozad/underi18n]
-    if (typeof define === 'function' && define.amd) {
-       define([], function() {
-           return (g.Mono = factory());
-       });
+(function(root, factory) {
+    if (typeof exports === 'function') {
+        // CommonJS
+        exports.Mono = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD (require.js)
+        define([], function() {
+            return (root.Mono = factory());
+        });
     } else {
-       g.Mono = factory();
+        // browser global
+        root.Mono = factory();
     }
 })(this, function() {
     var levels = {
