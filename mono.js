@@ -1,11 +1,15 @@
-(function(g, factory) {
-    // this conditional AMD module define code is ripped off from [github.com/ggozad/underi18n]
-    if (typeof define === 'function' && define.amd) {
-       define([], function() {
-           return (g.Mono = factory());
-       });
+(function(root, factory) {
+    if (typeof exports === 'function') {
+        // CommonJS
+        exports.Mono = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD (require.js)
+        define([], function() {
+            return (root.Mono = factory());
+        });
     } else {
-       g.Mono = factory();
+        // browser global
+        root.Mono = factory();
     }
 })(this, function() {
     var levels = {
@@ -20,14 +24,23 @@
     var off = false;
 
     function timetag() {
-        // format: Fri Dec 14 2012 15:02:39 GMT+0900 (KST)
+        // out form(local time): Fri Jan 11 2013 13:33:42,055
         var d = new Date(),
-            ds = d.toLocaleString(),
-            re = /\w+ (\w+ \d+ \d+ \S+)/,
-            time = re.exec(ds)[1],
-            mil = d.getMilliseconds();
+            mtab = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            dtab = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            d2 = function(t) { return t < 10 ? '0' + t : '' + t; },
+            d3 = function(t) { return t < 10 ? '00' + t : (t < 100 ? '0' + t : '' + t); };
 
-        return time + ',' + mil;
+        return [
+            dtab[d.getDay()],
+            mtab[d.getMonth()],
+            d.getDate(),
+            d.getFullYear(), [
+                d2(d.getHours()),
+                d2(d.getMinutes()),
+                d2(d.getSeconds()) + ',' + d3(d.getMilliseconds())
+            ].join(':')
+        ].join(' ');
     }
 
     function logger(Obj) {
