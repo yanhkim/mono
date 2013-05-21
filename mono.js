@@ -45,21 +45,24 @@
 
     function logger(Obj) {
         var domain = Obj._domain,
-            level = Obj._level;
-        function binder(enabled, fn, level) {
+            level = Obj._level,
+            defaultFn = 'log';
+        function builder(enabled, fn, level) {
             return enabled ? function() {
                 if (off) return;
                 // logging format: Dec 14 2012 15:42:41,453 - LOG - root - [your message here]
-                var prefix = [timetag(), level, domain].join(' - ') + ' -';
-                fn.apply(console, [prefix].concat([].slice.call(arguments, 0)));
+                var prefix = [timetag(), level, domain].join(' - ') + ' - ',
+                    message = [].slice.call(arguments, 0).join(' ');
+                fn = console[fn] ? fn : defaultFn;
+                console[fn](prefix + message);
             } : new Function();
         }
         return {
-            l: binder(levels.LOG >= level, console.log, 'LOG'),
-            d: binder(levels.DEBUG >= level, console.debug, 'DEBUG'),
-            i: binder(levels.INFO >= level, console.info, 'INFO'),
-            w: binder(levels.WARNING >= level, console.warn, 'WARNING'),
-            e: binder(levels.ERROR >= level, console.error, 'ERROR')
+            l: builder(levels.LOG     >= level, 'log',    'LOG'),
+            d: builder(levels.DEBUG   >= level, 'debug',  'DEBUG'),
+            i: builder(levels.INFO    >= level, 'info',   'INFO'),
+            w: builder(levels.WARNING >= level, 'warn',   'WARNING'),
+            e: builder(levels.ERROR   >= level, 'error',  'ERROR')
         };
     }
 
